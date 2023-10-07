@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(astra_linux_app LANGUAGES CXX)
+project(untitled LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -27,14 +27,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 if(ANDROID)
-  add_library(astra_linux_app SHARED
+  add_library(untitled SHARED
     main.cpp
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
   )
 else()
-  add_executable(astra_linux_app
+  add_executable(untitled
     main.cpp
     mainwindow.cpp
     mainwindow.h
@@ -42,4 +42,4 @@ else()
   )
 endif()
 
-target_link_libraries(astra_linux_app PRIVATE Qt5::Widgets)
+target_link_libraries(untitled PRIVATE Qt5::Widgets)
