@@ -2,34 +2,40 @@
 #include "./ui_mainwindow.h"
 
 #include <QApplication>
-#include <QFileSystemModel>
-#include <QFileIconProvider>
-#include <QScreen>
 #include <QTreeView>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , proxyModel(new QSortFilterProxyModel(this))
+    , model(new QFileSystemModel(this))
+    , rootPath(QDir::homePath())
 {
     ui->setupUi(this);
+    resize(600, 600);
 
-    const QString rootPath = QDir::homePath();
-    QFileSystemModel *model = new QFileSystemModel(this);
     model->setRootPath(rootPath);
     model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
+    col = model->columnCount();
 
-    ui->treeView->setModel(model);
-    if (!rootPath.isEmpty()) {
-        const QModelIndex rootIndex = model->index(QDir::cleanPath(rootPath));
-        if (rootIndex.isValid())
-            ui->treeView->setRootIndex(rootIndex);
+    proxyModel->setSourceModel(model);
+    ui->treeView->setModel(proxyModel);
+
+    const QModelIndex rootIndex = proxyModel->mapFromSource(model->index(QDir::cleanPath(rootPath)));
+
+    if (rootIndex.isValid()) {
+        ui->treeView->setRootIndex(rootIndex);
     }
 
-    ui->treeView->setAnimated(false);
-    ui->treeView->setIndentation(20);
+    ui->treeView->setIndentation(30);
     ui->treeView->setSortingEnabled(true);
 
-    setWindowTitle(QObject::tr("Dir View"));
+    QTimer::singleShot(0, this, SLOT(resizeColumn()));
+    connect(ui->treeView, &QTreeView::expanded, this, &MainWindow::resizeColumn);
+    connect(ui->treeView, &QTreeView::collapsed, this, &MainWindow::resizeColumn);
+
+    setWindowTitle(tr("Дерево файлов"));
 }
 
 MainWindow::~MainWindow()
@@ -37,9 +43,32 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showEvent(QShowEvent *event) {
-    QMainWindow::showEvent(event);
+void MainWindow::resizeColumn()
+{
+    for (int i = 0; i < col; ++i) {
+        ui->treeView->resizeColumnToContents(i);
+    }
+}
 
-    ui->treeView->resizeColumnToContents(0);
+void MainWindow::on_lineEdit_textChanged(const QString &text)
+{
+    if (!text.isEmpty()) {
+        QRegExp regExp(text, Qt::CaseInsensitive, QRegExp::Wildcard);
+        proxyModel->setRecursiveFilteringEnabled(true);
+        proxyModel->setFilterKeyColumn(curIndex);
+        proxyModel->setFilterRegExp(regExp);
+    } else {
+        proxyModel->setFilterRegExp(QRegExp());
+        const QModelIndex rootIndex = proxyModel->mapFromSource(model->index(QDir::cleanPath(rootPath)));
+
+        if (rootIndex.isValid()) {
+            ui->treeView->setRootIndex(rootIndex);
+        }
+    }
+}
+
+void MainWindow::on_comboBox_currentIndexChanged(int newIndex)
+{
+    curIndex = newIndex;
 }
 
