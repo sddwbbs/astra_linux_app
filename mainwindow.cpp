@@ -83,6 +83,7 @@ void MainWindow::on_lineEdit_textChanged(const QString &text)
         proxyModel->setFilterKeyColumn(curIndex);
         proxyModel->setFilterRegExp(regExp);
     } else {
+        curLen = 0;
         resetFilter();
     }
 }
