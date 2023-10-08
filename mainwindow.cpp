@@ -1,10 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-#include <QApplication>
-#include <QTreeView>
-#include <QTimer>
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -36,11 +32,33 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->treeView, &QTreeView::collapsed, this, &MainWindow::resizeColumn);
 
     setWindowTitle(tr("Дерево файлов"));
+    readSettings();
 }
 
 MainWindow::~MainWindow()
 {
+    writeSettings();
     delete ui;
+}
+
+void MainWindow::readSettings()
+{
+    QSettings settings("MySoft", "MyProgram");
+
+    settings.beginGroup("MainWindowGeometry");
+    resize(settings.value("size", QSize(400, 400)).toSize());
+    move(settings.value("position", QPoint(200, 200)).toPoint());
+    settings.endGroup();
+}
+
+void MainWindow::writeSettings()
+{
+    QSettings settings("MySoft", "MyProgram");
+
+    settings.beginGroup("MainWindowGeometry");
+    settings.setValue("size", size());
+    settings.setValue("position", pos());
+    settings.endGroup();
 }
 
 void MainWindow::resizeColumn()
