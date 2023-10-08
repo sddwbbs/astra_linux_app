@@ -52,18 +52,29 @@ void MainWindow::resizeColumn()
 
 void MainWindow::on_lineEdit_textChanged(const QString &text)
 {
+    if (curLen > text.length()) {
+        resetFilter();
+    } else {
+        curLen = text.length();
+    }
+
     if (!text.isEmpty()) {
+        ui->lineEdit->setClearButtonEnabled(true);
         QRegExp regExp(text, Qt::CaseInsensitive, QRegExp::Wildcard);
         proxyModel->setRecursiveFilteringEnabled(true);
         proxyModel->setFilterKeyColumn(curIndex);
         proxyModel->setFilterRegExp(regExp);
     } else {
-        proxyModel->setFilterRegExp(QRegExp());
-        const QModelIndex rootIndex = proxyModel->mapFromSource(model->index(QDir::cleanPath(rootPath)));
+        resetFilter();
+    }
+}
 
-        if (rootIndex.isValid()) {
-            ui->treeView->setRootIndex(rootIndex);
-        }
+void MainWindow::resetFilter() {
+    proxyModel->setFilterRegExp(QRegExp());
+    const QModelIndex rootIndex = proxyModel->mapFromSource(model->index(QDir::cleanPath(rootPath)));
+
+    if (rootIndex.isValid()) {
+        ui->treeView->setRootIndex(rootIndex);
     }
 }
 

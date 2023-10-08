@@ -30,8 +30,10 @@ private:
     Ui::MainWindow *ui;
     int col = 0;
     int curIndex = 0;
+    int curLen = 0;
     QSortFilterProxyModel *proxyModel;
     QFileSystemModel *model;
     const QString rootPath;
+    void resetFilter();
 };
 #endif // MAINWINDOW_H
